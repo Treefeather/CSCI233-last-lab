@@ -1,0 +1,52 @@
+package lab4;
+
+import java.util.Random;
+
+public class Matrix {
+private int size;
+public Matrix(int size){
+	this.size=size;
+}
+public int[][] buildMatrix(){
+	Random random= new Random();
+	int[][] matrix= new int[size][size];
+	for (int j=0;j<size;j++){
+		for(int k=0;k<size;k++)
+		{
+			matrix[j][k]= random.nextInt(10); //random value between 0-10
+		}
+	}
+	return matrix;
+}
+public void printMatrix(int[][] a){
+	for (int i=0; i<size;i++)
+	{
+		for (int j=0;j<size;j++)
+		{
+			int d= a[i][j];
+			System.out.println("["+i+"] "+"["+j+"] = "+d);
+		}
+	}
+	System.out.println("");
+}
+public int[][] bruteForce() //needs further testing, but seems to work for 2x2
+{
+	int[][] matrixA= buildMatrix();
+	printMatrix(matrixA);
+	int[][] matrixB= buildMatrix();
+	printMatrix(matrixB);
+	int[][] matrixC= new int [size][size];
+	
+	for (int d=0;d<size;d++) //adapted from lectures slides
+	{
+		for (int e=0;e<size;e++)
+		{
+			for(int f=0;f<size;f++)
+			{
+				matrixC[d][e]+=matrixA[d][f]*matrixB[f][e];
+			}
+		}
+	}
+	return matrixC;
+}
+}
