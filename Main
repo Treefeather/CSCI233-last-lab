@@ -1,0 +1,19 @@
+package lab4;
+
+import java.util.Scanner;
+
+
+public class Main {
+	public static void main(String [] args){
+	Scanner s= new Scanner(System.in);
+	String i="";
+	System.out.println("Enter size of matrix (input 2x2 as 2): "); 
+	int size= s.nextInt();
+	Matrix m= new Matrix(size);
+	int[][] result= m.bruteForce();
+	m.printMatrix(result);
+}
+}
+
+
+
