@@ -7,9 +7,10 @@ public class Driver {
     public static void main(String args[]) {
         Driver d = new Driver();
     }
+
     public Driver() {
         Strassen s = new Strassen();
-        int size = 16;
+        int size = 256;
         int[][] A = new int[size][size];
         int[][] B = new int[size][size];
         int[][] C = new int[size][size];
@@ -19,17 +20,21 @@ public class Driver {
                 B[i][j] = (int) (6 + j);
             }
         }
-        BruteForce(A, B, C, size);
-        double startTime = System.currentTimeMillis();
+        double start = System.currentTimeMillis(); //Start Timing
+        BruteForce(A, B, C, size); //Run
+        double end = System.currentTimeMillis(); // End Timing
+        double Run = end- start;
+        System.out.println("Total run time Brute Force = " + Run + " milliseconds");
+
+        double startTime = System.currentTimeMillis(); //Start Timing
         s.multiply(A, B);
-        double endTime = System.currentTimeMillis();
+        double endTime = System.currentTimeMillis(); // End Timing
         double RunTime = endTime - startTime;
-        System.out.println("Total run time Strassen = " + RunTime +" milliseconds");
+        System.out.println("Total run time Strassen = " + RunTime + " milliseconds");
     }
 
     public void BruteForce(int A[][], int B[][], int C[][], int s) {
         int size = s;
-        double startTime = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 C[i][j] = 0;
@@ -38,89 +43,59 @@ public class Driver {
                 }
             }
         }
-        double endTime = System.currentTimeMillis();
-        double RunTime = endTime - startTime;
-        System.out.println("Total run time Brute Force = " + RunTime +" milliseconds");
     }
 
-
-    /** Class Strassen **/
     public class Strassen {
-        /**
-         * Function to multiply matrices
-         **/
-        double startTime = System.currentTimeMillis();
-
         public int[][] multiply(int[][] A, int[][] B) {
-            int n = A.length;
-            int[][] R = new int[n][n];
-            /** base case **/
-            if (n == 1)
+            int n = A.length; // Get length of N
+            int[][] R = new int[n][n]; // Create Answer Matrix
+            if (n == 1) //Base
                 R[0][0] = A[0][0] * B[0][0];
             else {
+                int[][] A00 = new int[n / 2][n / 2];
+                int[][] A01 = new int[n / 2][n / 2];
+                int[][] A10 = new int[n / 2][n / 2];
                 int[][] A11 = new int[n / 2][n / 2];
-                int[][] A12 = new int[n / 2][n / 2];
-                int[][] A21 = new int[n / 2][n / 2];
-                int[][] A22 = new int[n / 2][n / 2];
+                int[][] B00 = new int[n / 2][n / 2];
+                int[][] B01 = new int[n / 2][n / 2];
+                int[][] B10 = new int[n / 2][n / 2];
                 int[][] B11 = new int[n / 2][n / 2];
-                int[][] B12 = new int[n / 2][n / 2];
-                int[][] B21 = new int[n / 2][n / 2];
-                int[][] B22 = new int[n / 2][n / 2];
 
-                /** Dividing matrix A into 4 halves **/
-                split(A, A11, 0, 0);
-                split(A, A12, 0, n / 2);
-                split(A, A21, n / 2, 0);
-                split(A, A22, n / 2, n / 2);
-                /** Dividing matrix B into 4 halves **/
-                split(B, B11, 0, 0);
-                split(B, B12, 0, n / 2);
-                split(B, B21, n / 2, 0);
-                split(B, B22, n / 2, n / 2);
+                //Dividing A
+                split(A, A00, 0, 0);
+                split(A, A01, 0, n / 2);
+                split(A, A10, n / 2, 0);
+                split(A, A11, n / 2, n / 2);
+                //Divide B
+                split(B, B00, 0, 0);
+                split(B, B01, 0, n / 2);
+                split(B, B10, n / 2, 0);
+                split(B, B11, n / 2, n / 2);
 
-                /**
-                 M1 = (A11 + A22)(B11 + B22)
-                 M2 = (A21 + A22) B11
-                 M3 = A11 (B12 - B22)
-                 M4 = A22 (B21 - B11)
-                 M5 = (A11 + A12) B22
-                 M6 = (A21 - A11) (B11 + B12)
-                 M7 = (A12 - A22) (B21 + B22)
-                 **/
+                //Using Strassen Method Multiplication
+                int[][] M1 = multiply(add(A00, A11), add(B00, B11));
+                int[][] M2 = multiply(add(A10, A11), B00);
+                int[][] M3 = multiply(A00, subtract(B01, B11));
+                int[][] M4 = multiply(A11, subtract(B10, B00));
+                int[][] M5 = multiply(add(A00, A01), B11);
+                int[][] M6 = multiply(subtract(A10, A00), add(B00, B01));
+                int[][] M7 = multiply(subtract(A01, A11), add(B10, B11));
 
-                int[][] M1 = multiply(add(A11, A22), add(B11, B22));
-                int[][] M2 = multiply(add(A21, A22), B11);
-                int[][] M3 = multiply(A11, sub(B12, B22));
-                int[][] M4 = multiply(A22, sub(B21, B11));
-                int[][] M5 = multiply(add(A11, A12), B22);
-                int[][] M6 = multiply(sub(A21, A11), add(B11, B12));
-                int[][] M7 = multiply(sub(A12, A22), add(B21, B22));
-
-                /**
-                 C11 = M1 + M4 - M5 + M7
-                 C12 = M3 + M5
-                 C21 = M2 + M4
-                 C22 = M1 - M2 + M3 + M6
-                 **/
-                int[][] C11 = add(sub(add(M1, M4), M5), M7);
+                int[][] C11 = add(subtract(add(M1, M4), M5), M7);
                 int[][] C12 = add(M3, M5);
                 int[][] C21 = add(M2, M4);
-                int[][] C22 = add(sub(add(M1, M3), M2), M6);
+                int[][] C22 = add(subtract(add(M1, M3), M2), M6);
 
-                /** join 4 halves into one result matrix **/
+                //Combining
                 join(C11, R, 0, 0);
                 join(C12, R, 0, n / 2);
                 join(C21, R, n / 2, 0);
                 join(C22, R, n / 2, n / 2);
             }
-            /** return result **/
             return R;
         }
-
-        /**
-         * Funtion to sub two matrices
-         **/
-        public int[][] sub(int[][] A, int[][] B) {
+        //Subtraction
+        public int[][] subtract(int[][] A, int[][] B) {
             int n = A.length;
             int[][] C = new int[n][n];
             for (int i = 0; i < n; i++)
@@ -129,9 +104,7 @@ public class Driver {
             return C;
         }
 
-        /**
-         * Funtion to add two matrices
-         **/
+        //Addition
         public int[][] add(int[][] A, int[][] B) {
             int n = A.length;
             int[][] C = new int[n][n];
@@ -141,21 +114,18 @@ public class Driver {
             return C;
         }
 
-        /**
-         * Funtion to split parent matrix into child matrices
-         **/
+        //Splitting
         public void split(int[][] P, int[][] C, int iB, int jB) {
             for (int i1 = 0, i2 = iB; i1 < C.length; i1++, i2++)
                 for (int j1 = 0, j2 = jB; j1 < C.length; j1++, j2++)
                     C[i1][j1] = P[i2][j2];
         }
 
-        /**
-         * Funtion to join child matrices intp parent matrix
-         **/
+        //Joining
         public void join(int[][] C, int[][] P, int iB, int jB) {
             for (int i1 = 0, i2 = iB; i1 < C.length; i1++, i2++)
                 for (int j1 = 0, j2 = jB; j1 < C.length; j1++, j2++)
                     P[i2][j2] = C[i1][j1];
         }
     }
+}
