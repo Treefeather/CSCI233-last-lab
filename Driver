@@ -10,7 +10,7 @@ public class Driver {
 
     public Driver() {
         Strassen s = new Strassen();
-        int size = 256;
+        int size = 2048; // Size of initial matrix
         int[][] A = new int[size][size];
         int[][] B = new int[size][size];
         int[][] C = new int[size][size];
@@ -20,17 +20,32 @@ public class Driver {
                 B[i][j] = (int) (6 + j);
             }
         }
+        double startTime = System.currentTimeMillis(); //Start Timing
+        int R[][] = s.multiply(A, B);
+        double endTime = System.currentTimeMillis(); // End Timing
+        double RunTime = endTime - startTime;
+        System.out.println("Total run time Strassen = " + RunTime + " milliseconds");
+
         double start = System.currentTimeMillis(); //Start Timing
         BruteForce(A, B, C, size); //Run
         double end = System.currentTimeMillis(); // End Timing
         double Run = end- start;
         System.out.println("Total run time Brute Force = " + Run + " milliseconds");
+       /* for (int i = 0; i < C.length; i++) {
+            for (int j = 0; j < C.length; j++) {
+                System.out.print(C[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+        for (int i = 0; i < R.length; i++) {
+            for (int j = 0; j < R.length; j++) {
+                System.out.print(R[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();*/
 
-        double startTime = System.currentTimeMillis(); //Start Timing
-        s.multiply(A, B);
-        double endTime = System.currentTimeMillis(); // End Timing
-        double RunTime = endTime - startTime;
-        System.out.println("Total run time Strassen = " + RunTime + " milliseconds");
     }
 
     public void BruteForce(int A[][], int B[][], int C[][], int s) {
@@ -46,11 +61,15 @@ public class Driver {
     }
 
     public class Strassen {
+        int exit = 512; //Size of Matrix that is sent to Brute force to finish
         public int[][] multiply(int[][] A, int[][] B) {
             int n = A.length; // Get length of N
             int[][] R = new int[n][n]; // Create Answer Matrix
             if (n == 1) //Base
                 R[0][0] = A[0][0] * B[0][0];
+            else if(n == exit){
+                BruteForce(A,B,R,exit); // Calling Brute force  to finish with smaller matrices
+            }
             else {
                 int[][] A00 = new int[n / 2][n / 2];
                 int[][] A01 = new int[n / 2][n / 2];
